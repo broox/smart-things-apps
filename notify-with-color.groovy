@@ -26,14 +26,13 @@ definition(
     name: "Notify Me With Color",
     namespace: "broox",
     author: "Derek Brooks",
-    description: "Changes the color and brightness of lightbulbs when any of a variety of SmartThings actions occur.  Supports motion, contact, acceleration, moisture and presence sensors as well as buttons and switches.",
+    description: "Temporarily changes the color and brightness of lightbulbs when any of a variety of SmartThings actions occur.  Supports motion, contact, acceleration, moisture and presence sensors as well as modes, schedules, buttons and switches.",
     category: "SmartThings Labs",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/hue.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/hue@2x.png"
+    iconUrl: "http://cdn.device-icons.smartthings.com/Lighting/light11-icn.png",
+    iconX2Url: "http://cdn.device-icons.smartthings.com/Lighting/light11-icn@2x.png"
 )
 
 preferences {
-
     section("Control these bulbs...") {
         input "bulbs", "capability.colorControl", title: "Which bulbs?", required:true, multiple:true
     }
@@ -43,26 +42,25 @@ preferences {
         input "contact", "capability.contactSensor", title: "Sensor opens", required: false, multiple: true
         input "contactClosed", "capability.contactSensor", title: "Sensor closes", required: false, multiple: true
         input "acceleration", "capability.accelerationSensor", title: "Acceleration is detected", required: false, multiple: true
+        input "button1", "capability.button", title: "Button is pressed", required:false, multiple:true
         input "mySwitch", "capability.switch", title: "Switch is turned on", required: false, multiple: true
         input "mySwitchOff", "capability.switch", title: "Switch is turned off", required: false, multiple: true
         input "arrivalPresence", "capability.presenceSensor", title: "Someone arrives", required: false, multiple: true
         input "departurePresence", "capability.presenceSensor", title: "Someone departs", required: false, multiple: true
         input "smoke", "capability.smokeDetector", title: "Smoke is detected", required: false, multiple: true
         input "water", "capability.waterSensor", title: "Water is detected", required: false, multiple: true
-        input "button1", "capability.button", title: "Button is pressed", required:false, multiple:true
         input "triggerModes", "mode", title: "System changes mode", description: "Select mode(s)", required: false, multiple: true
         input "timeOfDay", "time", title: "The time is", required: false
     }
 
-    section("Choose bulb effects...")
-        {
-            input "inputColor", "enum", title: "Color", required: false, options: [[100:"Red"],[39:"Green"],[70:"Blue"],[25:"Yellow"],[10:"Orange"],[75:"Purple"],[83:"Pink"]]
-            input "inputLevel", "enum", title: "Brightness", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
-            input "duration", "number", title: "Number of seconds", description: "Defaults to 5 seconds", value: "5", required: true
-            input "turnOn", "enum", title: "Turn on when off?", required: false, options: ["yes", "no"]
-        }
+    section("Choose bulb effects...") {
+        input "inputColor", "enum", title: "Color", options: [[100:"Red"],[39:"Green"],[70:"Blue"],[25:"Yellow"],[10:"Orange"],[75:"Purple"],[83:"Pink"]], defaultValue: 100, required: true
+        input "inputLevel", "enum", title: "Brightness", options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]], defaultValue: 50, required: true
+        input "duration", "number", title: "Number of seconds", defaultValue: "2", required: true
+        input "turnOn", "enum", title: "Turn on when off?", options: ["Yes", "No"], defaultValue: "No", required: true
+    }
 
-    section("Minimum time between messages (optional, defaults to every message)") {
+    section("Minimum time between notifications (optional, defaults to every notification)") {
         input "frequency", "decimal", title: "Minutes", required: false
     }
 }
@@ -132,7 +130,7 @@ def appTouchHandler(evt) {
 }
 
 def getDesiredBulbs() {    
-    if (turnOn == "yes") {
+    if (turnOn == "Yes") {
         return bulbs
     } else {
         return bulbs.findAll({ it.currentValue("switch") == "on" })
@@ -180,7 +178,6 @@ def setTimer() {
         runIn(duration, "resetBulbs", [overwrite: false])
     }
 }
-
 
 def resetBulbs() {
     def bulbsToReset = getDesiredBulbs()
